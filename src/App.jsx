@@ -5,7 +5,7 @@ import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import TaskManager from "./components/taskmanager";
 import Dashboard from "./pages/Dashboard";
-import ProtectedRoute from "./components/protectedRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 function App() {
     return (
         <BrowserRouter>
