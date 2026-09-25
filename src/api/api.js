@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "task-management-backend-production-e618.up.railway.app"
+    baseURL: "https://task-management-backend-production-e618.up.railway.app"
 });
 
 api.interceptors.request.use(
