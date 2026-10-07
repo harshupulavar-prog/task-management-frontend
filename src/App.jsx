@@ -1,52 +1,35 @@
-import { BrowserRouter, Routes, Route, Link } from "react-router-dom";
+import { BrowserRouter, Navigate, Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import About from "./pages/About";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
-import TaskManager from "./components/taskmanager";
 import Dashboard from "./pages/Dashboard";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Navbar from "./components/Navbar";
+
 function App() {
     return (
         <BrowserRouter>
-             <nav>
-                <Link to="/Home">Home</Link>{" | "}
-                <Link to="/about">About</Link>{" | "}
-                <Link to="/login">Login</Link>{" | "}
-                <Link to="/signup">Signup</Link>{" | "}
-                <Link to="/tasks">Tasks</Link>
-                <Link to="/dashboard">Dashboard</Link>
-            </nav>
-
-            <Routes>
-
-                <Route path="/" element={<Home />} />
-
-                <Route path="/about" element={<About />} />
-
-                <Route path="/login" element={<Login />} />
-
-
-                <Route path="/signup" element={<Signup />} />
-
-                <Route path="/tasks" element={<TaskManager />} />
-                 
-                  <Route
-                    path="/dashboard"
-                    element={
-                        <ProtectedRoute>
-                            <Dashboard />
-                        </ProtectedRoute>
-                    }
-                />
-
-            </Routes>
-
+            <div className="min-h-screen bg-slate-50">
+                <Navbar />
+                <Routes>
+                    <Route path="/" element={<Navigate to="/home" replace />} />
+                    <Route path="/home" element={<Home />} />
+                    <Route path="/about" element={<About />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/signup" element={<Signup />} />
+                    <Route
+                        path="/dashboard"
+                        element={
+                            <ProtectedRoute>
+                                <Dashboard />
+                            </ProtectedRoute>
+                        }
+                    />
+                </Routes>
+            </div>
         </BrowserRouter>
     );
 }
-
-
-   
 
 export default App;

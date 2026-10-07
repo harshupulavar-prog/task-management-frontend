@@ -166,8 +166,7 @@ function TaskManager() {
 
 
     return (
-         <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-          <div className="w-full max-w-lg bg-white p-4 rounded-lg shadow-md">
+        <div className="w-full">
        
 
             <h1>Task Manager</h1>
@@ -359,7 +358,6 @@ function TaskManager() {
                 </div>
 
             </div>
-        </div>
 
     
     );
