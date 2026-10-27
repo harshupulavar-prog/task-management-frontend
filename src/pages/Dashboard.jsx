@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import TaskManager from "../components/TaskManager";
+import TaskManager from "../components/taskmanager";
 import { useAuth } from "../context/AuthContext";
 
 function Dashboard() {
