@@ -1,8 +1,9 @@
 import axios from "axios";
 
 const api = axios.create({
-    baseURL: "https://task-management-backend-1-dlaw.onrender.com"
-//    baseURL: "http://127.0.0.1:8000"
+    baseURL: import.meta.env.VITE_API_BASE_URL ||
+        // "https://task-management-backend-1-dlaw.onrender.com"
+        "http://127.0.0.1:8000"
 });
 
 api.interceptors.request.use(

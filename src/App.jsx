@@ -4,6 +4,8 @@ import About from "./pages/About";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 import Dashboard from "./pages/Dashboard";
+import AdminUsers from "./pages/AdminUsers";
+import AdminSignupComplete from "./pages/AdminSignupComplete";
 import ProtectedRoute from "./components/ProtectedRoute";
 import Navbar from "./components/Navbar";
 
@@ -19,10 +21,22 @@ function App() {
                     <Route path="/login" element={<Login />} />
                     <Route path="/signup" element={<Signup />} />
                     <Route
+                        path="/admin/complete-signup"
+                        element={<AdminSignupComplete />}
+                    />
+                    <Route
                         path="/dashboard"
                         element={
                             <ProtectedRoute>
                                 <Dashboard />
+                            </ProtectedRoute>
+                        }
+                    />
+                    <Route
+                        path="/admin/users"
+                        element={
+                            <ProtectedRoute requiredRole="admin">
+                                <AdminUsers />
                             </ProtectedRoute>
                         }
                     />

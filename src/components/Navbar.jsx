@@ -11,7 +11,7 @@ function linkClass({ isActive }) {
 }
 
 function Navbar() {
-    const { token } = useAuth();
+    const { token, user } = useAuth();
     const { pathname } = useLocation();
 
     return (
@@ -39,6 +39,11 @@ function Navbar() {
                     {token && (
                         <NavLink to="/dashboard" className={linkClass}>
                             Dashboard
+                        </NavLink>
+                    )}
+                    {token && user?.role === "admin" && (
+                        <NavLink to="/admin/users" className={linkClass}>
+                            User management
                         </NavLink>
                     )}
                 </nav>

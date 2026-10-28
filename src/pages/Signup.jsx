@@ -1,74 +1,184 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import api from "../api/api";
 
 function Signup() {
-
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-
+    const [code, setCode] = useState("");
+    const [step, setStep] = useState("details");
+    const [error, setError] = useState("");
+    const [notice, setNotice] = useState("");
+    const [submitting, setSubmitting] = useState(false);
     const navigate = useNavigate();
+    
 
-    async function signup(e) {
-        e.preventDefault();
+    async function requestCode(event) {
+        event.preventDefault();
+        setError("");
+        setNotice("");
+        setSubmitting(true);
 
         try {
-            await api.post("/signup", {
-                email: email,
-                password: password
+            const response = await api.post("/signup", {
+                email,
+                password
             });
+            setStep("verify");
+            setNotice(response.data.message);
+        } catch (requestError) {
+            setError(
+                requestError.response?.data?.detail ||
+                "Could not send the verification code. Please try again."
+            );
+        } finally {
+            setSubmitting(false);
+        }
+    }
 
-            navigate("/login");
+    async function verifyCode(event) {
+        event.preventDefault();
+        setError("");
+        setSubmitting(true);
 
-        } catch (error) {
-    console.log("Signup error:", error);
-    console.log("Backend response:", error.response?.data);
-}
+        try {
+            await api.post("/signup/verify", { email, code });
+            navigate("/login", {
+                state: { message: "Account created. You can now log in." }
+            });
+        } catch (requestError) {
+            setError(
+                requestError.response?.data?.detail ||
+                "Could not verify the code. Please try again."
+            );
+        } finally {
+            setSubmitting(false);
+        }
     }
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
-            <div className="w-full max-w-sm rounded-lg bg-white p-6 shadow-md">
-                <h2 className="mb-6 text-center text-2xl font-bold">
-                    Signup
-                </h2>
+        <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-slate-50 p-4">
+            <section className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+                <h1 className="text-center text-2xl font-bold text-slate-950">
+                    Create your account
+                </h1>
+                <p className="mt-2 text-center text-sm text-slate-600">
+                    {step === "details"
+                        ? "Verify your email address to get started."
+                        : `Enter the six-digit code sent to ${email}.`}
+                </p>
 
-                <form onSubmit={signup}>
-                    <div className="mb-4">
-                        <label className="mb-2 block font-medium">
-                            Email
-                        </label>
-                        <input
-                            type="email"
-                            placeholder="Enter your email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full rounded border border-gray-300 px-3 py-2"
-                        />
-                    </div>
+                {notice && (
+                    <p className="mt-5 rounded-md bg-emerald-50 p-3 text-sm text-emerald-800" role="status">
+                        {notice}
+                    </p>
+                )}
 
-                    <div className="mb-5">
-                        <label className="mb-2 block font-medium">
-                            Password
-                        </label>
-                        <input
-                            type="password"
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full rounded border border-gray-300 px-3 py-2"
-                        />
-                    </div>
+                {step === "details" ? (
+                    <form onSubmit={requestCode} className="mt-6 space-y-5">
+                        <div>
+                            <label htmlFor="signup-email" className="mb-2 block text-sm font-medium text-slate-700">
+                                Email
+                            </label>
+                            <input
+                                id="signup-email"
+                                type="email"
+                                autoComplete="email"
+                                required
+                                value={email}
+                                onChange={(event) => setEmail(event.target.value)}
+                                className="w-full rounded-md border border-slate-300 px-3 py-2.5"
+                            />
+                        </div>
 
-                    <button
-                        type="submit"
-                        className="w-full rounded bg-blue-500 py-2 text-white hover:bg-blue-600"
-                    >
-                        Signup
-                    </button>
-                </form>
-            </div>
-        </div>
+                        <div>
+                            <label htmlFor="signup-password" className="mb-2 block text-sm font-medium text-slate-700">
+                                Password
+                            </label>
+                            <input
+                                id="signup-password"
+                                type="password"
+                                autoComplete="new-password"
+                                minLength={8}
+                                required
+                                value={password}
+                                onChange={(event) => setPassword(event.target.value)}
+                                className="w-full rounded-md border border-slate-300 px-3 py-2.5"
+                            />
+                            <p className="mt-1 text-xs text-slate-500">
+                                Use at least 8 characters.
+                            </p>
+                        </div>
+
+                        {error && (
+                            <p className="text-sm text-red-700" role="alert">
+                                {error}
+                            </p>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={submitting}
+                            className="w-full rounded-md bg-emerald-700 px-4 py-2.5 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {submitting ? "Sending code..." : "Send verification code"}
+                        </button>
+                    </form>
+                ) : (
+                    <form onSubmit={verifyCode} className="mt-6 space-y-5">
+                        <div>
+                            <label htmlFor="signup-code" className="mb-2 block text-sm font-medium text-slate-700">
+                                Verification code
+                            </label>
+                            <input
+                                id="signup-code"
+                                type="text"
+                                inputMode="numeric"
+                                autoComplete="one-time-code"
+                                pattern="[0-9]{6}"
+                                maxLength={6}
+                                required
+                                value={code}
+                                onChange={(event) => setCode(event.target.value)}
+                                className="w-full rounded-md border border-slate-300 px-3 py-2.5 tracking-[0.3em]"
+                            />
+                        </div>
+
+                        {error && (
+                            <p className="text-sm text-red-700" role="alert">
+                                {error}
+                            </p>
+                        )}
+
+                        <button
+                            type="submit"
+                            disabled={submitting}
+                            className="w-full rounded-md bg-emerald-700 px-4 py-2.5 font-semibold text-white hover:bg-emerald-800 disabled:cursor-not-allowed disabled:opacity-60"
+                        >
+                            {submitting ? "Verifying..." : "Verify and create account"}
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setStep("details");
+                                setNotice("");
+                                setError("");
+                            }}
+                            className="w-full text-sm font-medium text-slate-600 hover:text-slate-950"
+                        >
+                            Change signup details
+                        </button>
+                    </form>
+                )}
+
+                <p className="mt-6 text-center text-sm text-slate-600">
+                    Already have an account?{" "}
+                    <Link to="/login" className="font-semibold text-emerald-800 hover:underline">
+                        Log in
+                    </Link>
+                </p>
+            </section>
+        </main>
     );
 }
 

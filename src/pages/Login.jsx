@@ -1,136 +1,117 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import api from "../api/api";
 import { useAuth } from "../context/AuthContext";
 
 function Login() {
-
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-
+    const location = useLocation();
+    const notice = location.state?.message || "";
     const navigate = useNavigate();
-
     const { login: loginUser } = useAuth();
 
-
-    async function login(e) {
-
-        e.preventDefault();
-
+    async function login(event) {
+        event.preventDefault();
         setError("");
 
         try {
-
             const formData = new URLSearchParams();
-
             formData.append("username", email);
             formData.append("password", password);
 
-            const response = await api.post(
-                "/login",
-                formData,
-                {
-                    headers: {
-                        "Content-Type": "application/x-www-form-urlencoded"
-                    }
+            const response = await api.post("/login", formData, {
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded"
                 }
-            );
+            });
 
-            const token = response.data.access_token;
-
-            loginUser(token, email);
-
-            console.log("Login successful");
-
+            const user = response.data.user || {
+                email,
+                role: "user"
+            };
+            loginUser(response.data.access_token, user);
             navigate("/dashboard");
-
-        } catch (error) {
-
-            console.log(error.response?.data);
-
-            if (error.response) {
-                setError("Invalid email or password");
-            } else {
-                setError("Server is not available");
-            }
+        } catch (requestError) {
+            setError(
+                requestError.response?.data?.detail ||
+                (requestError.response
+                    ? "Invalid email or password"
+                    : "Server is not available")
+            );
         }
     }
 
-
     return (
-        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
+        <main className="flex min-h-[calc(100vh-4rem)] items-center justify-center bg-slate-50 p-4">
+            <section className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+                <h1 className="text-center text-2xl font-bold text-slate-950">
+                    Welcome back
+                </h1>
+                <p className="mt-2 text-center text-sm text-slate-600">
+                    Log in to manage your tasks.
+                </p>
 
-            <div className="w-full max-w-sm bg-white p-6 rounded-lg shadow-md">
-
-                <h2 className="text-2xl font-bold text-center mb-6">
-                    Login
-                </h2>
-
-
-                <form onSubmit={login}>
-
-                    {/* EMAIL */}
-
-                    <div className="mb-4">
-
-                        <label className="block font-medium mb-2">
-                            Email
-                        </label>
-
-                        <input
-                            type="email"
-                            placeholder="Enter your email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full border border-gray-300 rounded px-3 py-2"
-                        />
-
-                    </div>
-
-
-                    {/* PASSWORD */}
-
-                    <div className="mb-5">
-
-                        <label className="block font-medium mb-2">
-                            Password
-                        </label>
-
-                        <input
-                            type="password"
-                            placeholder="Enter your password"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                            className="w-full border border-gray-300 rounded px-3 py-2"
-                        />
-
-                    </div>
-
-
-                    {/* LOGIN BUTTON */}
-
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-500 hover:bg-blue-600 text-white py-2 rounded"
-                    >
-                        Login
-                    </button>
-
-                </form>
-
-
-                {/* ERROR */}
-
-                {error && (
-                    <p className="text-red-500 text-center mt-4">
-                        {error}
+                {notice && (
+                    <p className="mt-5 rounded-md bg-emerald-50 p-3 text-sm text-emerald-800" role="status">
+                        {notice}
                     </p>
                 )}
 
-            </div>
+                <form onSubmit={login} className="mt-6 space-y-5">
+                    <div>
+                        <label htmlFor="login-email" className="mb-2 block text-sm font-medium text-slate-700">
+                            Email
+                        </label>
+                        <input
+                            id="login-email"
+                            type="email"
+                            autoComplete="email"
+                            required
+                            value={email}
+                            onChange={(event) => setEmail(event.target.value)}
+                            className="w-full rounded-md border border-slate-300 px-3 py-2.5"
+                        />
+                    </div>
 
-        </div>
+                    <div>
+                        <label htmlFor="login-password" className="mb-2 block text-sm font-medium text-slate-700">
+                            Password
+                        </label>
+                        <input
+                            id="login-password"
+                            type="password"
+                            autoComplete="current-password"
+                            required
+                            value={password}
+                            onChange={(event) => setPassword(event.target.value)}
+                            className="w-full rounded-md border border-slate-300 px-3 py-2.5"
+                        />
+                    </div>
+
+                    {error && (
+                        <p className="text-sm text-red-700" role="alert">
+                            {error}
+                        </p>
+                    )}
+
+                    <button
+                        type="submit"
+                        className="w-full rounded-md bg-emerald-700 px-4 py-2.5 font-semibold text-white hover:bg-emerald-800"
+                    >
+                        Log in
+                    </button>
+                </form>
+
+                <p className="mt-6 text-center text-sm text-slate-600">
+                    New to Task Manager?{" "}
+                    <Link to="/signup" className="font-semibold text-emerald-800 hover:underline">
+                        Create a new account
+                    </Link>
+                </p>
+            </section>
+        </main>
     );
 }
 
